@@ -1,0 +1,56 @@
+name: ipsec-lab
+
+mgmt:
+  network: ipsec-lab-mgmt
+  ipv4-subnet: 172.31.250.0/24
+
+topology:
+  nodes:
+    pc1:
+      kind: linux
+      image: ipsec-alpine:latest
+      binds:
+        - ./configs/pc1.sh:/root/start.sh:ro
+      exec:
+        - bash /root/start.sh
+
+    r1:
+      kind: linux
+      image: ipsec-alpine:latest
+      binds:
+        - ./configs/r1.sh:/root/start.sh:ro
+        - ./strongswan/r1-swanctl.conf:/etc/swanctl/swanctl.conf:ro
+      exec:
+        - bash /root/start.sh
+
+    transit:
+      kind: linux
+      image: ipsec-alpine:latest
+      binds:
+        - ./configs/transit.sh:/root/start.sh:ro
+        - ./scripts/transit-log.sh:/root/transit-log.sh
+      exec:
+        - bash /root/start.sh
+
+    r2:
+      kind: linux
+      image: ipsec-alpine:latest
+      binds:
+        - ./configs/r2.sh:/root/start.sh:ro
+        - ./strongswan/r2-swanctl.conf:/etc/swanctl/swanctl.conf:ro
+      exec:
+        - bash /root/start.sh
+
+    pc2:
+      kind: linux
+      image: ipsec-alpine:latest
+      binds:
+        - ./configs/pc2.sh:/root/start.sh:ro
+      exec:
+        - bash /root/start.sh
+
+  links:
+    - endpoints: ["pc1:eth1", "r1:eth1"]
+    - endpoints: ["r1:eth2", "transit:eth1"]
+    - endpoints: ["transit:eth2", "r2:eth1"]
+    - endpoints: ["r2:eth2", "pc2:eth1"]
