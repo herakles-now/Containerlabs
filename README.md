@@ -35,19 +35,22 @@ infrastructure quickly.
 | Lab | Description |
 | --- | --- |
 | [`ipsec-containerlab`](./ipsec-containerlab) | strongSwan-based IPsec site-to-site VPN lab. |
+| [`bgp-lab`](./bgp-lab) | Seven-AS FRRouting eBGP lab covering route propagation, best-path selection, multihoming, and Local Preference. |
+| [`nat4-containerlab`](./nat4-containerlab) | Four isolated nftables NAT scenarios with packet captures and conntrack inspection. |
 
 Each lab lives in its own directory with a dedicated `README.md` describing the
 topology, how to deploy it, and the failure scenarios to experiment with.
 
 ## Usage
 
-A typical lab is deployed and torn down like this:
+A typical lab is deployed, verified, and torn down like this:
 
 ```bash
 cd <lab-directory>
-sudo containerlab deploy -t <topology>.clab.yml
+sudo make deploy
+sudo make verify
 # ... experiment, break things, inspect logs ...
-sudo containerlab destroy -t <topology>.clab.yml
+sudo make destroy
 ```
 
 See the README inside each lab for the specific commands and scenarios.

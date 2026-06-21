@@ -1,0 +1,76 @@
+name: nat4
+
+mgmt:
+  network: clab-mgmt
+  ipv4-subnet: 172.30.0.0/24
+
+topology:
+  defaults:
+    kind: linux
+    image: nat4-lab:latest
+    cap-add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+
+  nodes:
+    # Static one-to-one NAT
+    static-host: {}
+    static-gw: {}
+    static-server: {}
+    br-n4-si:
+      kind: bridge
+    br-n4-so:
+      kind: bridge
+
+    # Dynamic pool-based NAT
+    dynamic-host1: {}
+    dynamic-host2: {}
+    dynamic-gw: {}
+    dynamic-server: {}
+    br-n4-di:
+      kind: bridge
+    br-n4-do:
+      kind: bridge
+
+    # Static port forwarding
+    forward-client: {}
+    forward-gw: {}
+    forward-server: {}
+    br-n4-fi:
+      kind: bridge
+    br-n4-fo:
+      kind: bridge
+
+    # Dynamic port NAT / PAT
+    pat-host1: {}
+    pat-host2: {}
+    pat-gw: {}
+    pat-server: {}
+    br-n4-pi:
+      kind: bridge
+    br-n4-po:
+      kind: bridge
+
+  links:
+    - endpoints: ["static-host:eth1", "br-n4-si:si-host"]
+    - endpoints: ["static-gw:eth1", "br-n4-si:si-gw"]
+    - endpoints: ["static-gw:eth2", "br-n4-so:so-gw"]
+    - endpoints: ["static-server:eth1", "br-n4-so:so-server"]
+
+    - endpoints: ["dynamic-host1:eth1", "br-n4-di:di-host1"]
+    - endpoints: ["dynamic-host2:eth1", "br-n4-di:di-host2"]
+    - endpoints: ["dynamic-gw:eth1", "br-n4-di:di-gw"]
+    - endpoints: ["dynamic-gw:eth2", "br-n4-do:do-gw"]
+    - endpoints: ["dynamic-server:eth1", "br-n4-do:do-server"]
+
+    - endpoints: ["forward-server:eth1", "br-n4-fi:fi-server"]
+    - endpoints: ["forward-gw:eth1", "br-n4-fi:fi-gw"]
+    - endpoints: ["forward-gw:eth2", "br-n4-fo:fo-gw"]
+    - endpoints: ["forward-client:eth1", "br-n4-fo:fo-client"]
+
+    - endpoints: ["pat-host1:eth1", "br-n4-pi:pi-host1"]
+    - endpoints: ["pat-host2:eth1", "br-n4-pi:pi-host2"]
+    - endpoints: ["pat-gw:eth1", "br-n4-pi:pi-gw"]
+    - endpoints: ["pat-gw:eth2", "br-n4-po:po-gw"]
+    - endpoints: ["pat-server:eth1", "br-n4-po:po-server"]
