@@ -8,7 +8,7 @@ topology:
   nodes:
     pc1:
       kind: linux
-      image: ipsec-alpine:latest
+      image: ipsec-lab:latest
       binds:
         - ./configs/pc1.sh:/root/start.sh:ro
       exec:
@@ -16,7 +16,7 @@ topology:
 
     r1:
       kind: linux
-      image: ipsec-alpine:latest
+      image: ipsec-lab:latest
       binds:
         - ./configs/r1.sh:/root/start.sh:ro
         - ./strongswan/r1-swanctl.conf:/etc/swanctl/swanctl.conf:ro
@@ -25,7 +25,7 @@ topology:
 
     transit:
       kind: linux
-      image: ipsec-alpine:latest
+      image: ipsec-lab:latest
       binds:
         - ./configs/transit.sh:/root/start.sh:ro
         - ./scripts/transit-log.sh:/root/transit-log.sh
@@ -34,7 +34,7 @@ topology:
 
     r2:
       kind: linux
-      image: ipsec-alpine:latest
+      image: ipsec-lab:latest
       binds:
         - ./configs/r2.sh:/root/start.sh:ro
         - ./strongswan/r2-swanctl.conf:/etc/swanctl/swanctl.conf:ro
@@ -43,7 +43,7 @@ topology:
 
     pc2:
       kind: linux
-      image: ipsec-alpine:latest
+      image: ipsec-lab:latest
       binds:
         - ./configs/pc2.sh:/root/start.sh:ro
       exec:

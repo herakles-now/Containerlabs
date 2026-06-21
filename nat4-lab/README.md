@@ -15,7 +15,7 @@ The common Alpine image contains Bash, iproute2, nftables, tcpdump, conntrack-to
 ## Quick Start
 
 ```bash
-cd nat4-containerlab
+cd nat4-lab
 sudo make deploy
 sudo make verify
 ```
@@ -93,9 +93,9 @@ Lines marked `[INSIDE]` show packets before NAT on `eth1`; lines marked `[OUTSID
 
 ```bash
 sudo make state
-docker exec clab-nat4-pat-gw nft list table ip nat4
-docker exec clab-nat4-pat-gw conntrack -L -o extended
-docker exec clab-nat4-pat-gw ip -br address
+docker exec clab-nat4-lab-pat-gw nft list table ip nat4
+docker exec clab-nat4-lab-pat-gw conntrack -L -o extended
+docker exec clab-nat4-lab-pat-gw ip -br address
 ```
 
 Conntrack displays original and reply tuples. nftables makes the NAT decision for the first packet of a flow; later packets follow the stored conntrack mapping. Rules and state must therefore be examined together.

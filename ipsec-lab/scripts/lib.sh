@@ -3,7 +3,7 @@
 LAB_NAME="ipsec-lab"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TOPOLOGY_FILE="${PROJECT_DIR}/ipsec-lab.clab.yml"
-IMAGE_NAME="ipsec-alpine:latest"
+IMAGE_NAME="ipsec-lab:latest"
 NODES=(pc1 r1 transit r2 pc2)
 
 container_name() {

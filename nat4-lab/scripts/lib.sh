@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-LAB_NAME="nat4"
+LAB_NAME="nat4-lab"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TOPOLOGY_FILE="${PROJECT_DIR}/clab.yml"
+TOPOLOGY_FILE="${PROJECT_DIR}/nat4-lab.clab.yml"
 IMAGE_NAME="nat4-lab:latest"
 
 CONTAINERS=(

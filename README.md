@@ -24,6 +24,22 @@ In short: a safe sandbox to make mistakes on purpose, watch what happens, and
 build the instincts and observability know-how needed to debug real
 infrastructure quickly.
 
+## Inspiration
+
+These labs are inspired by the training courses created by
+[Adrian Cantrill](https://learn.cantrill.io/), including his free Tech
+Fundamentals course. They are independent, hands-on implementations built to
+reinforce and extend the networking and infrastructure concepts covered in
+those courses. This repository is not officially affiliated with or endorsed by
+Adrian Cantrill.
+
+After 26 years in IT, I can strongly recommend Adrian's courses. Revisiting
+familiar topics through his training helped me understand many of them more
+clearly and at a greater depth. Most IT professionals know the OSI model, but
+Adrian's explanations helped me refresh that knowledge and develop a deeper,
+more practical understanding that continues to improve how I reason about and
+troubleshoot real systems.
+
 ## Requirements
 
 - [Containerlab](https://containerlab.dev/install/)
@@ -34,9 +50,9 @@ infrastructure quickly.
 
 | Lab | Description |
 | --- | --- |
-| [`ipsec-containerlab`](./ipsec-containerlab) | strongSwan-based IPsec site-to-site VPN lab. |
+| [`ipsec-lab`](./ipsec-lab) | strongSwan-based IPsec site-to-site VPN lab. |
 | [`bgp-lab`](./bgp-lab) | Seven-AS FRRouting eBGP lab covering route propagation, best-path selection, multihoming, and Local Preference. |
-| [`nat4-containerlab`](./nat4-containerlab) | Four isolated nftables NAT scenarios with packet captures and conntrack inspection. |
+| [`nat4-lab`](./nat4-lab) | Four isolated nftables NAT scenarios with packet captures and conntrack inspection. |
 
 Each lab lives in its own directory with a dedicated `README.md` describing the
 topology, how to deploy it, and the failure scenarios to experiment with.

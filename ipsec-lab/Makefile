@@ -1,7 +1,7 @@
 .PHONY: build deploy verify destroy clean
 
 build:
-	docker build -t ipsec-alpine:latest .
+	docker build -t ipsec-lab:latest .
 
 deploy:
 	./scripts/deploy.sh
@@ -13,4 +13,4 @@ destroy:
 	./scripts/destroy.sh
 
 clean: destroy
-	docker image rm ipsec-alpine:latest 2>/dev/null || true
+	docker image rm ipsec-lab:latest 2>/dev/null || true

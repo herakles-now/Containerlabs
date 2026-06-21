@@ -9,7 +9,7 @@ bridges:
 	./scripts/setup-host-bridges.sh
 
 deploy: build bridges
-	containerlab deploy --topo clab.yml
+	containerlab deploy --topo nat4-lab.clab.yml
 	./scripts/configure-all.sh
 
 configure:
@@ -41,7 +41,7 @@ state:
 	./scripts/show-state.sh
 
 destroy:
-	@if containerlab inspect --topo clab.yml >/dev/null 2>&1; then containerlab destroy --topo clab.yml --cleanup; fi
+	@if containerlab inspect --topo nat4-lab.clab.yml >/dev/null 2>&1; then containerlab destroy --topo nat4-lab.clab.yml --cleanup; fi
 	./scripts/cleanup-host-bridges.sh
 
 clean: destroy
