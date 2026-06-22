@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Runs INSIDE the transit container. It is mounted into the container by the
+# topology and started as a background daemon by configs/transit.sh; it writes
+# the packet capture to the log that transit-watch.sh tails from the host. Do
+# not run it directly on the host.
+
 LOG_DIR=/var/log/ipsec-lab
 LOG_FILE="${LOG_DIR}/transit.log"
 mkdir -p "${LOG_DIR}"
