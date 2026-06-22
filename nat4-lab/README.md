@@ -71,19 +71,24 @@ Each test clears its NAT state, starts the appropriate HTTP server, captures bot
 
 ## Live Captures
 
-Terminal 1:
-
 ```bash
 ./lab.sh capture-static
 ```
 
-Terminal 2 during the 30-second capture window:
+Each capture first asks whether it should generate the matching test traffic itself once `tcpdump` is listening:
 
-```bash
-./lab.sh test-static
+```text
+Auto-generate the matching test traffic once the capture is up? [Y/n]
 ```
 
-Other capture actions are `capture-dynamic`, `capture-forward`, and `capture-pat`. Override the duration with the `DURATION` environment variable:
+- Press Enter (or `y`) and the capture fires the scenario's flow for you and uses a short window. Nothing else is needed.
+- Answer `n` to drive the traffic yourself; the capture then prints the exact command to run in a second terminal during the window, e.g.:
+
+  ```bash
+  ./lab.sh test-static
+  ```
+
+Other capture actions are `capture-dynamic`, `capture-forward`, and `capture-pat`. Override the window length with the `DURATION` environment variable (applies to both the auto and manual paths):
 
 ```bash
 DURATION=60 ./lab.sh capture-pat
