@@ -62,75 +62,38 @@ usage() {
   echo "Run without arguments for the interactive launcher."
 }
 
-# Build a flat list of selectable menu entries. Each lab contributes an
-# "open menu" entry followed by its own actions (queried via `lab.sh --list`).
-# Entries are stored as "kind|key|action|description"; kind is menu|action.
-ENTRIES=()
-build_entries() {
-  ENTRIES=()
-  local entry key dir script action desc
+# Launcher menu: pick a lab, then its own lab.sh menu opens. Quitting that
+# inner menu (q) returns here so another lab can be chosen.
+print_menu() {
+  local i=1 entry key desc
+  echo
+  echo "  ContainerLab — choose a lab"
+  echo "  ──────────────────────────────────────────────────"
   for entry in "${LABS[@]}"; do
     key="${entry%%|*}"
-    dir="$(lab_dir "${key}")"
-    script="${ROOT_DIR}/${dir}/lab.sh"
-    ENTRIES+=("menu|${key}||open the ${dir} menu")
-    [[ -x "${script}" ]] || continue
-    while IFS=$'\t' read -r action desc; do
-      [[ -n "${action}" ]] || continue
-      ENTRIES+=("action|${key}|${action}|${desc}")
-    done < <("${script}" --list 2>/dev/null)
-  done
-}
-
-print_menu() {
-  local i=1 entry kind key action desc last_key=""
-  echo
-  echo "  ContainerLab — choose a lab or action"
-  echo "  ────────────────────────────────────────────────────────────"
-  for entry in "${ENTRIES[@]}"; do
-    IFS='|' read -r kind key action desc <<<"${entry}"
-    if [[ "${key}" != "${last_key}" ]]; then
-      echo "  $(lab_dir "${key}")"
-      last_key="${key}"
-    fi
-    if [[ "${kind}" == "menu" ]]; then
-      printf '  %2d)   %-16s %s\n' "${i}" "menu" "${desc}"
-    else
-      printf '  %2d)   %-16s %s\n' "${i}" "${action}" "${desc}"
-    fi
+    desc="${entry##*|}"
+    printf '  %2d) %-6s %s\n' "${i}" "${key}" "${desc}"
     ((i++))
   done
   echo "   q) quit"
-  echo "  ────────────────────────────────────────────────────────────"
-}
-
-run_entry() {
-  local entry="$1" kind key action desc script
-  IFS='|' read -r kind key action desc <<<"${entry}"
-  script="$(lab_script "${key}")"
-  if [[ "${kind}" == "menu" ]]; then
-    "${script}"
-  else
-    "${script}" "${action}"
-  fi
+  echo "  ──────────────────────────────────────────────────"
 }
 
 menu_loop() {
-  local choice
-  build_entries
+  local choice key script
   while true; do
     print_menu
-    read -rp "  Select an option: " choice || { echo; break; }
+    read -rp "  Select a lab: " choice || { echo; break; }
     case "${choice}" in
       q|Q|quit|exit) echo; break ;;
       "") continue ;;
       *[!0-9]*) echo "  Invalid choice: ${choice}" >&2; continue ;;
       *)
-        if (( choice >= 1 && choice <= ${#ENTRIES[@]} )); then
+        if (( choice >= 1 && choice <= ${#LABS[@]} )); then
+          key="${LABS[choice-1]%%|*}"
+          script="$(lab_script "${key}")"
           echo
-          run_entry "${ENTRIES[choice-1]}" || echo "  Action exited with a non-zero status." >&2
-          echo
-          read -rp "  Press Enter to return to the launcher... " _ || break
+          "${script}"
         else
           echo "  Invalid choice: ${choice}" >&2
         fi

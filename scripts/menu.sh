@@ -56,8 +56,8 @@ usage() {
   echo "Run without an action for an interactive menu."
 }
 
-# Machine-readable list of "action<TAB>description" lines, consumed by the
-# top-level launcher to build its aggregated menu.
+# Machine-readable list of "action<TAB>description" lines (via `lab.sh --list`),
+# handy for scripting or shell completion.
 list_actions() {
   local entry
   for entry in "${ACTIONS[@]}"; do

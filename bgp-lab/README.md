@@ -93,6 +93,19 @@ For a quick status snapshot or the full containerlab view, use:
 ./lab.sh inspect   # containerlab graph/inventory plus the per-router state
 ```
 
+### Break things on purpose
+
+```bash
+./lab.sh break     # choose a fault, or "random" for a mystery
+./lab.sh heal      # restore the baseline (reveals a mystery fault)
+./lab.sh config    # show the running-config and optionally edit + re-apply
+```
+
+Faults: `peer-shutdown` (R1's session to R3 is administratively down),
+`as-mismatch` (R1 uses the wrong remote-as for R2), `withdraw-prefix` (R7 stops
+originating 10.7.0.0/16). Inject one, then use `verify`/`state` to find it and
+`heal` to fix it.
+
 Useful manual commands include:
 
 ```bash
