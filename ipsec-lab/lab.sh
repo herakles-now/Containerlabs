@@ -18,6 +18,7 @@ ACTIONS=(
   "state|show-state.sh|Show IPsec SAs, policies and routing"
   "inspect|inspect-lab.sh|Show the containerlab and per-node state"
   "break|break.sh|Inject a fault (named or random) to diagnose"
+  "diagnose|diagnose.sh|Guided, layer-by-layer diagnosis"
   "heal|heal.sh|Restore the lab to its known-good baseline"
   "config|edit-config.sh|Show the config and optionally edit + re-apply"
   "transit-watch|transit-watch.sh|Follow the transit capture (IKE/ESP)"

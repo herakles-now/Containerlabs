@@ -28,6 +28,7 @@ ACTIONS=(
   "state|show-state.sh|Show nftables and conntrack per gateway"
   "inspect|inspect-lab.sh|Show the containerlab and per-case state"
   "break|break.sh|Inject a fault (named or random) to diagnose"
+  "diagnose|diagnose.sh|Guided, layer-by-layer diagnosis"
   "heal|heal.sh|Restore the lab to its known-good baseline"
   "config|edit-config.sh|Show the config and optionally edit + re-apply"
   "destroy|destroy.sh|Tear down the lab and host bridges"
