@@ -53,11 +53,10 @@ check_ipsec() {
 }
 
 check_datapath() {
-  if run_on pc1 ping -c 2 -W 2 10.2.0.10 >/dev/null 2>&1; then
-    return 0
-  fi
-  echo "         PC1 cannot reach PC2 (10.2.0.10) through the tunnel"
-  return 1
+  local status=0
+  run_on pc1 ping -c 2 -W 2 10.2.0.10 >/dev/null 2>&1 || { echo "         PC1 cannot reach PC2 (10.2.0.10) through the tunnel"; status=1; }
+  run_on pc2 ping -c 2 -W 2 10.1.0.10 >/dev/null 2>&1 || { echo "         PC2 cannot reach PC1 (10.1.0.10) through the tunnel"; status=1; }
+  return "${status}"
 }
 
 CHECKS=(

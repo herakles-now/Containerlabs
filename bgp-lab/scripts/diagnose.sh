@@ -51,21 +51,27 @@ check_sessions() {
 }
 
 check_prefixes() {
-  local p status=0
-  for p in 10.1.0.0/16 10.2.0.0/16 10.3.0.0/16 10.4.0.0/16 10.5.0.0/16 10.6.0.0/16 10.7.0.0/16; do
-    if ! vtysh_on r1 "show bgp ipv4 unicast ${p}" 2>/dev/null | grep -Fq "BGP routing table entry for ${p}"; then
-      echo "         R1 is missing ${p} in its BGP table"; status=1
-    fi
+  local r p table status=0
+  # Every router should learn all seven /16s (one router per AS, full
+  # propagation). Check each router's table, not just R1.
+  for r in "${ROUTERS[@]}"; do
+    table="$(vtysh_on "${r}" "show bgp ipv4 unicast" 2>/dev/null)"
+    for p in 10.1.0.0/16 10.2.0.0/16 10.3.0.0/16 10.4.0.0/16 10.5.0.0/16 10.6.0.0/16 10.7.0.0/16; do
+      if ! grep -Fq "${p}" <<<"${table}"; then
+        echo "         ${r} is missing ${p} in its BGP table"; status=1
+      fi
+    done
   done
   return "${status}"
 }
 
 check_datapath() {
-  if run_on r1 ping -c 2 -W 2 -I 10.1.0.1 10.7.0.1 >/dev/null 2>&1; then
-    return 0
-  fi
-  echo "         R1 (10.1.0.1) cannot reach R7 (10.7.0.1)"
-  return 1
+  local status=0
+  # A few sourced pings across different AS-path lengths, not just R1->R7.
+  run_on r1 ping -c 2 -W 2 -I 10.1.0.1 10.7.0.1 >/dev/null 2>&1 || { echo "         R1 (10.1.0.1) cannot reach R7 (10.7.0.1)"; status=1; }
+  run_on r2 ping -c 2 -W 2 -I 10.2.0.1 10.6.0.1 >/dev/null 2>&1 || { echo "         R2 (10.2.0.1) cannot reach R6 (10.6.0.1)"; status=1; }
+  run_on r4 ping -c 2 -W 2 -I 10.5.0.1 10.1.0.1 >/dev/null 2>&1 || { echo "         R4 (10.5.0.1) cannot reach R1 (10.1.0.1)"; status=1; }
+  return "${status}"
 }
 
 CHECKS=(
