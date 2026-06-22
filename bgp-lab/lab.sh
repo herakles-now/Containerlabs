@@ -19,6 +19,7 @@ ACTIONS=(
   "state|show-state.sh|Show per-router BGP and routing state"
   "inspect|inspect-lab.sh|Show the containerlab and per-router state"
   "break|break.sh|Inject a fault (named or random) to diagnose"
+  "diagnose|diagnose.sh|Guided, layer-by-layer diagnosis"
   "heal|heal.sh|Restore the lab to its known-good baseline"
   "config|edit-config.sh|Show the config and optionally edit + re-apply"
   "prefer-r3|prefer-r3-to-r5.sh|Apply the Local-Preference policy on R1"

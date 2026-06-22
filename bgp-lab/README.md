@@ -97,14 +97,17 @@ For a quick status snapshot or the full containerlab view, use:
 
 ```bash
 ./lab.sh break     # choose a fault, or "random" for a mystery
+./lab.sh diagnose  # guided, layer-by-layer diagnosis with hints
 ./lab.sh heal      # restore the baseline (reveals a mystery fault)
 ./lab.sh config    # show the running-config and optionally edit + re-apply
 ```
 
 Faults: `peer-shutdown` (R1's session to R3 is administratively down),
 `as-mismatch` (R1 uses the wrong remote-as for R2), `withdraw-prefix` (R7 stops
-originating 10.7.0.0/16). Inject one, then use `verify`/`state` to find it and
-`heal` to fix it.
+originating 10.7.0.0/16). Inject one, then run `diagnose` (or `verify`/`state`)
+to find it and `heal` to fix it. `diagnose` checks bottom-up — containers,
+addresses, forwarding, BGP sessions, prefixes, data path — and stops at the
+lowest failing layer.
 
 Useful manual commands include:
 

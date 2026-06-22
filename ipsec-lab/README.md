@@ -84,6 +84,7 @@ For a status snapshot or the full containerlab view, use:
 
 ```bash
 ./lab.sh break     # choose a fault, or "random" for a mystery
+./lab.sh diagnose  # guided, layer-by-layer diagnosis with hints
 ./lab.sh heal      # restore the baseline (reveals a mystery fault)
 ./lab.sh config    # show the loaded connections and optionally edit + reload
 ```
@@ -91,7 +92,9 @@ For a status snapshot or the full containerlab view, use:
 Faults: `block-ike` (R1 drops UDP/500, so the tunnel cannot be negotiated),
 `block-esp` (the transit drops ESP, so the SA stays up but data cannot pass —
 a great teaching case), `wrong-route` (R1 loses its default route to the
-transit). Diagnose with `verify`/`state`/`transit-watch`, then `heal`.
+transit). `diagnose` checks bottom-up — containers, routes, forwarding, IKE/ESP,
+data path — so `block-esp` is exactly the case where every layer is healthy
+except the data path. Then `heal` (or use `verify`/`transit-watch`).
 
 You can follow the transit "Internet" capture (IKE/ESP) with:
 

@@ -100,14 +100,17 @@ reversible faults and restore itself:
 
 ```bash
 ./lab.sh bgp break       # pick a named fault, or a random "mystery" one
-./lab.sh bgp verify      # diagnose the symptom (also: state, inspect)
-./lab.sh bgp heal         # restore the known-good baseline (reveals a mystery)
+./lab.sh bgp diagnose    # guided, layer-by-layer diagnosis with hints
+./lab.sh bgp verify      # flat pass/fail suite (also: state, inspect)
+./lab.sh bgp heal        # restore the known-good baseline (reveals a mystery)
 ./lab.sh bgp config      # show the running config and optionally edit + re-apply
 ```
 
 A mystery fault is not revealed until you `heal`, so you can practise pure
-diagnosis. `config` lets you view the effective configuration and tweak the
-source to experiment.
+diagnosis. `diagnose` walks the network bottom-up and stops at the lowest
+failing layer with a hint — pointing at the problem area without naming the
+fault. `config` lets you view the effective configuration and tweak the source
+to experiment.
 
 ## License
 
