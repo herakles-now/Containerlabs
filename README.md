@@ -1,8 +1,8 @@
-# ContainerLab Labs
+# Containerlab Scenarios
 
-A collection of hands-on [Containerlab](https://containerlab.dev/) labs built to
-develop a deeper, practical understanding of **network and cloud
-infrastructure**.
+> Learning by breaking — for a deeper understanding of network & cloud infrastructure.
+
+A collection of hands-on [Containerlab](https://containerlab.dev/) scenarios.
 
 ## Goal
 
