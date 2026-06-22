@@ -29,6 +29,28 @@ check_interfaces() {
   return "${status}"
 }
 
+check_links() {
+  local r nbr status=0
+  declare -A peers=(
+    [r1]="192.168.12.2 192.168.13.2"
+    [r2]="192.168.12.1 192.168.25.2"
+    [r3]="192.168.13.1 192.168.35.2 192.168.34.2"
+    [r4]="192.168.34.1 192.168.46.2"
+    [r5]="192.168.25.1 192.168.35.1"
+    [r6]="192.168.46.1 192.168.67.2"
+    [r7]="192.168.67.1"
+  )
+  for r in "${ROUTERS[@]}"; do
+    # Each /30 neighbor is directly connected; pinging it validates both ends'
+    # addressing and the link, independently of BGP.
+    # shellcheck disable=SC2086
+    for nbr in ${peers[$r]}; do
+      run_on "${r}" ping -c 1 -W 1 "${nbr}" >/dev/null 2>&1 || { echo "         ${r} cannot reach its /30 neighbor ${nbr}"; status=1; }
+    done
+  done
+  return "${status}"
+}
+
 check_forwarding() {
   local r status=0
   for r in "${ROUTERS[@]}"; do
@@ -66,17 +88,27 @@ check_prefixes() {
 }
 
 check_datapath() {
-  local status=0
-  # A few sourced pings across different AS-path lengths, not just R1->R7.
-  run_on r1 ping -c 2 -W 2 -I 10.1.0.1 10.7.0.1 >/dev/null 2>&1 || { echo "         R1 (10.1.0.1) cannot reach R7 (10.7.0.1)"; status=1; }
-  run_on r2 ping -c 2 -W 2 -I 10.2.0.1 10.6.0.1 >/dev/null 2>&1 || { echo "         R2 (10.2.0.1) cannot reach R6 (10.6.0.1)"; status=1; }
-  run_on r4 ping -c 2 -W 2 -I 10.5.0.1 10.1.0.1 >/dev/null 2>&1 || { echo "         R4 (10.5.0.1) cannot reach R1 (10.1.0.1)"; status=1; }
+  local src dst status=0
+  declare -A dummy=(
+    [r1]=10.1.0.1 [r2]=10.2.0.1 [r3]=10.4.0.1 [r4]=10.5.0.1
+    [r5]=10.3.0.1 [r6]=10.6.0.1 [r7]=10.7.0.1
+  )
+  # Full mesh: every router must reach every other router's loopback, sourced
+  # from its own loopback.
+  for src in "${ROUTERS[@]}"; do
+    for dst in "${ROUTERS[@]}"; do
+      [[ "${src}" == "${dst}" ]] && continue
+      run_on "${src}" ping -c 1 -W 1 -I "${dummy[$src]}" "${dummy[$dst]}" >/dev/null 2>&1 \
+        || { echo "         ${src} (${dummy[$src]}) cannot reach ${dst} (${dummy[$dst]})"; status=1; }
+    done
+  done
   return "${status}"
 }
 
 CHECKS=(
   "Containers running|Some routers are down — deploy or restart the lab.|check_containers"
   "Interfaces & addresses|A router lost its dummy0 address — re-run './lab.sh bgp configure'.|check_interfaces"
+  "Point-to-point links|A /30 link is down or misaddressed; check the eth interfaces and both link endpoints.|check_links"
   "IPv4 forwarding|A router will not forward transit traffic; check net.ipv4.ip_forward.|check_forwarding"
   "BGP sessions|A neighbor is down; in 'show bgp summary' look for Idle/Active and check remote-as plus 'no neighbor ... shutdown'.|check_sessions"
   "Prefix origination|R1 is missing prefixes; check that each origin router still has its 'network' statement.|check_prefixes"

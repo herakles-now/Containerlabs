@@ -21,9 +21,10 @@ check_containers() {
 
 check_routes() {
   local status=0
-  if ! run_on r1 ip route show default 2>/dev/null | grep -q 'via 100.64.1.2'; then
-    echo "         R1 has no default route towards the transit (100.64.1.2)"; status=1
-  fi
+  run_on r1 ip route show default 2>/dev/null | grep -q 'via 100.64.1.2' || { echo "         R1 has no default route towards the transit (100.64.1.2)"; status=1; }
+  run_on r2 ip route show default 2>/dev/null | grep -q 'via 100.64.2.1' || { echo "         R2 has no default route towards the transit (100.64.2.1)"; status=1; }
+  run_on pc1 ip route show default 2>/dev/null | grep -q 'via 10.1.0.1' || { echo "         PC1 has no default route via R1 (10.1.0.1)"; status=1; }
+  run_on pc2 ip route show default 2>/dev/null | grep -q 'via 10.2.0.1' || { echo "         PC2 has no default route via R2 (10.2.0.1)"; status=1; }
   return "${status}"
 }
 
