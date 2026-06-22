@@ -48,7 +48,10 @@ run_diagnosis() {
   if [[ -n "${first_fail}" ]]; then
     echo "Lowest failing layer: ${first_fail}"
     echo "Start there. When you are done, restore with: ./lab.sh ${LAB_SHORT} heal"
-    return 1
+  else
+    echo "All layers passed; ${LAB_NAME} looks healthy."
   fi
-  echo "All layers passed; ${LAB_NAME} looks healthy."
+  # Diagnosis ran successfully; a failing layer is reported in the summary, not
+  # via the exit code (so the interactive menu does not flag it as an error).
+  return 0
 }
