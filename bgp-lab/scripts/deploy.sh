@@ -7,15 +7,15 @@ source "${SCRIPT_DIR}/lib.sh"
 
 require_command docker
 require_command containerlab
-require_root
+ensure_sudo
 
-if ! docker info >/dev/null 2>&1; then
+if ! docker_cmd info >/dev/null 2>&1; then
   echo "ERROR: Docker is installed, but the daemon is unavailable or access is denied." >&2
   exit 1
 fi
 
 echo "Deploying ${LAB_NAME}..."
-containerlab deploy --topo "${TOPOLOGY_FILE}"
+clab deploy --topo "${TOPOLOGY_FILE}"
 echo "Waiting for the FRR containers to initialize..."
 sleep 5
 "${SCRIPT_DIR}/configure.sh"

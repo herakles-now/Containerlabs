@@ -6,5 +6,5 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
 
 require_command containerlab
-require_root
-containerlab destroy --topo "${TOPOLOGY_FILE}" --cleanup
+ensure_sudo
+clab destroy --topo "${TOPOLOGY_FILE}" --cleanup

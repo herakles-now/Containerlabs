@@ -85,7 +85,7 @@ configure_bgp() {
 }
 
 for router in "${ROUTERS[@]}"; do
-  if ! docker inspect "$(container_name "${router}")" >/dev/null 2>&1; then
+  if ! docker_cmd inspect "$(container_name "${router}")" >/dev/null 2>&1; then
     echo "ERROR: Container $(container_name "${router}") does not exist. Deploy the lab first." >&2
     exit 1
   fi
