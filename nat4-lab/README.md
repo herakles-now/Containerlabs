@@ -110,6 +110,19 @@ Conntrack displays original and reply tuples. nftables makes the NAT decision fo
 
 `./lab.sh inspect` adds the current Containerlab view on top of the per-scenario state: it prints the live graph, the deployed lab inventory, the node interfaces, and then the nftables, conntrack, IP address, and routing state for each NAT gateway.
 
+## Break things on purpose
+
+```bash
+./lab.sh break     # choose a fault, or "random" for a mystery
+./lab.sh heal      # restore the baseline (reveals a mystery fault)
+./lab.sh config    # show the live nft rulesets and optionally edit + re-apply
+```
+
+Faults: `flush-nat` (static-gw's `ip nat4` table is deleted), `forwarding-off`
+(pat-gw stops forwarding), `rpfilter-on` (dynamic-gw enables strict reverse-path
+filtering and drops return traffic). Inject one, run the matching `test-*` or
+`verify` to see the breakage, then `heal`.
+
 ## Limitations
 
 - NAT is stateful and is not selected again for every packet.

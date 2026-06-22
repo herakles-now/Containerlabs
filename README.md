@@ -93,6 +93,22 @@ Every lab exposes `deploy`, `verify`, `state`, `inspect` and `destroy`; run a
 lab's `./lab.sh` without an action to see its full menu. See the README inside
 each lab for the specific actions and scenarios.
 
+### Break things on purpose
+
+The real learning is diagnosing a broken lab. Each lab can inject realistic,
+reversible faults and restore itself:
+
+```bash
+./lab.sh bgp break       # pick a named fault, or a random "mystery" one
+./lab.sh bgp verify      # diagnose the symptom (also: state, inspect)
+./lab.sh bgp heal         # restore the known-good baseline (reveals a mystery)
+./lab.sh bgp config      # show the running config and optionally edit + re-apply
+```
+
+A mystery fault is not revealed until you `heal`, so you can practise pure
+diagnosis. `config` lets you view the effective configuration and tweak the
+source to experiment.
+
 ## License
 
 See [LICENSE](./LICENSE).

@@ -80,6 +80,19 @@ For a status snapshot or the full containerlab view, use:
 ./lab.sh inspect   # containerlab graph/inventory plus the per-node state
 ```
 
+### Break things on purpose
+
+```bash
+./lab.sh break     # choose a fault, or "random" for a mystery
+./lab.sh heal      # restore the baseline (reveals a mystery fault)
+./lab.sh config    # show the loaded connections and optionally edit + reload
+```
+
+Faults: `block-ike` (R1 drops UDP/500, so the tunnel cannot be negotiated),
+`block-esp` (the transit drops ESP, so the SA stays up but data cannot pass —
+a great teaching case), `wrong-route` (R1 loses its default route to the
+transit). Diagnose with `verify`/`state`/`transit-watch`, then `heal`.
+
 You can follow the transit "Internet" capture (IKE/ESP) with:
 
 ```bash
