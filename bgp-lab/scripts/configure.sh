@@ -34,8 +34,7 @@ configure_linux() {
 
 wait_for_frr() {
   local router="$1"
-  local attempt
-  for attempt in {1..30}; do
+  for _ in {1..30}; do
     if vtysh_on "${router}" "show version" >/dev/null 2>&1; then
       return 0
     fi

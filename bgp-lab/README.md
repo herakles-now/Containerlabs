@@ -84,7 +84,16 @@ Run the complete test suite or display all control-plane routes:
 ./lab.sh routes
 ```
 
-The verification checks all containers and FRR instances, every BGP session, all seven prefixes on R1, both paths from R1 to R5, and bidirectional sourced pings between R1 and R7. Useful manual commands include:
+The verification checks all containers and FRR instances, IPv4 forwarding and the `dummy0` connected route on every router, every BGP session, all seven prefixes on R1, both paths from R1 to R5, and bidirectional sourced pings between R1 and R7.
+
+For a quick status snapshot or the full containerlab view, use:
+
+```bash
+./lab.sh state     # per-router BGP summary, BGP routes and kernel routes
+./lab.sh inspect   # containerlab graph/inventory plus the per-router state
+```
+
+Useful manual commands include:
 
 ```bash
 docker exec -it clab-bgp-lab-r1 vtysh -c 'show bgp summary'

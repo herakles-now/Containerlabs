@@ -70,18 +70,28 @@ to `sudo` only where Containerlab or host networking actually require root.
 ./lab.sh nat4 deploy     # run a single action in a lab
 ```
 
+Two global actions are not tied to a single lab:
+
+```bash
+./lab.sh doctor          # check docker, containerlab and sudo are available
+./lab.sh lint            # lint every shell script (bash -n + shellcheck)
+```
+
 A typical lab is deployed, verified, and torn down like this:
 
 ```bash
 cd <lab-directory>
 ./lab.sh deploy
 ./lab.sh verify
+./lab.sh state           # quick per-node status
+./lab.sh inspect         # containerlab view plus per-node state
 # ... experiment, break things, inspect logs ...
 ./lab.sh destroy
 ```
 
-Running a lab's `./lab.sh` without an action opens its own menu. See the README
-inside each lab for the specific actions and scenarios.
+Every lab exposes `deploy`, `verify`, `state`, `inspect` and `destroy`; run a
+lab's `./lab.sh` without an action to see its full menu. See the README inside
+each lab for the specific actions and scenarios.
 
 ## License
 

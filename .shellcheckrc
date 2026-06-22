@@ -1,0 +1,8 @@
+# ShellCheck configuration for the ContainerLab labs.
+#
+# Follow files pulled in via `source` and resolve their paths relative to the
+# directory of the script being checked. This lets ShellCheck see the shared
+# helpers in scripts/common.sh and scripts/menu.sh as well as each lab's
+# scripts/lib.sh, instead of emitting SC1091 "file not found".
+external-sources=true
+source-path=SCRIPTDIR

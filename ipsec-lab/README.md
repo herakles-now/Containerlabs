@@ -67,17 +67,26 @@ From this directory, build, deploy, and verify the complete lab with one command
 Run `./lab.sh` without an action for an interactive menu. The scripts run as the
 invoking user and escalate to `sudo` only where Containerlab requires root.
 
-The deployment script validates Docker and Containerlab, builds the image, deploys the topology, waits for strongSwan, triggers the tunnel, and runs the verification suite. Run verification again at any time with:
+The deployment script validates Docker and Containerlab, builds the image, deploys the topology, waits for strongSwan, triggers the tunnel, and runs the verification suite. Verification also asserts that the kernel XFRM state uses ESP and that IPv4 forwarding is enabled on `r1`, `r2` and the transit. Run verification again at any time with:
 
 ```bash
 ./lab.sh verify
 ```
 
-While traffic flows you can follow the transit "Internet" capture (IKE/ESP) with:
+For a status snapshot or the full containerlab view, use:
+
+```bash
+./lab.sh state     # IKE/CHILD SAs, XFRM state/policy and routes on r1/r2
+./lab.sh inspect   # containerlab graph/inventory plus the per-node state
+```
+
+You can follow the transit "Internet" capture (IKE/ESP) with:
 
 ```bash
 ./lab.sh transit-watch
 ```
+
+The capture is produced *inside* the transit container by `scripts/transit-log.sh` (started automatically at boot); `transit-watch` is the host-side follower that tails it. It offers to ping PC2 from PC1 for you so traffic appears without a second terminal — answer `n` to drive the traffic yourself.
 
 Packaging note: Alpine 3.20 ships `/usr/sbin/swanctl` as part of the
 `strongswan` package; unlike some distributions, Alpine does not provide a
