@@ -63,6 +63,18 @@ for router in "${ROUTERS[@]}"; do
   else
     fail "FRR/vtysh is unavailable on ${router}"
   fi
+
+  if [[ "$(run_on "${router}" cat /proc/sys/net/ipv4/ip_forward 2>/dev/null)" == "1" ]]; then
+    pass "${router} has IPv4 forwarding enabled"
+  else
+    fail "${router} does not have IPv4 forwarding enabled"
+  fi
+
+  if [[ -n "$(run_on "${router}" ip route show dev dummy0 2>/dev/null)" ]]; then
+    pass "${router} has its dummy0 connected route"
+  else
+    fail "${router} is missing its dummy0 connected route"
+  fi
 done
 
 declare -A PEERS=(

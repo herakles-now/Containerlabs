@@ -77,12 +77,30 @@ for router in r1 r2; do
     fail "Expected IKE/CHILD_SA is missing on ${router}"
   fi
 
-  if [[ -n "$(run_on "${router}" ip xfrm state 2>/dev/null)" ]]; then
+  xfrm_state="$(run_on "${router}" ip xfrm state 2>/dev/null || true)"
+  if [[ -n "${xfrm_state}" ]]; then
     pass "Kernel XFRM state exists on ${router}"
   else
     fail "Kernel XFRM state is missing on ${router}"
   fi
+  if grep -q 'proto esp' <<<"${xfrm_state}"; then
+    pass "${router} XFRM state uses ESP (traffic is encrypted in tunnel mode)"
+  else
+    fail "${router} XFRM state has no ESP entry"
+  fi
+
+  if [[ "$(run_on "${router}" cat /proc/sys/net/ipv4/ip_forward 2>/dev/null)" == "1" ]]; then
+    pass "${router} has IPv4 forwarding enabled"
+  else
+    fail "${router} does not have IPv4 forwarding enabled"
+  fi
 done
+
+if [[ "$(run_on transit cat /proc/sys/net/ipv4/ip_forward 2>/dev/null)" == "1" ]]; then
+  pass "transit has IPv4 forwarding enabled"
+else
+  fail "transit does not have IPv4 forwarding enabled"
+fi
 
 if (( failures > 0 )); then
   echo "${failures} verification check(s) failed. Collecting diagnostics..." >&2

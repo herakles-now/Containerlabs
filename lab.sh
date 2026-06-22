@@ -50,13 +50,14 @@ usage() {
   done
   echo
   echo "Global actions:"
+  echo "  doctor  Check the host has docker, containerlab and sudo"
   echo "  lint    Lint all shell scripts (bash -n + shellcheck)"
   echo
   echo "Examples:"
   echo "  ${0##*/}                 Interactive launcher"
   echo "  ${0##*/} bgp             Open the bgp-lab menu"
   echo "  ${0##*/} nat4 deploy     Run a single action in nat4-lab"
-  echo "  ${0##*/} lint            Lint all shell scripts"
+  echo "  ${0##*/} doctor          Check the environment"
   echo
   echo "Run without arguments for the interactive launcher."
 }
@@ -142,6 +143,7 @@ case "${1:-}" in
   "")             menu_loop ;;
   -h|--help|help) usage ;;
   lint)           shift; exec "${ROOT_DIR}/scripts/lint.sh" "$@" ;;
+  doctor)         shift; exec "${ROOT_DIR}/scripts/doctor.sh" "$@" ;;
   *)
     if script="$(lab_script "$1")"; then
       shift
