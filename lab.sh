@@ -49,10 +49,14 @@ usage() {
     printf '  %-6s %s\n' "${key}" "${desc}"
   done
   echo
+  echo "Global actions:"
+  echo "  lint    Lint all shell scripts (bash -n + shellcheck)"
+  echo
   echo "Examples:"
   echo "  ${0##*/}                 Interactive launcher"
   echo "  ${0##*/} bgp             Open the bgp-lab menu"
   echo "  ${0##*/} nat4 deploy     Run a single action in nat4-lab"
+  echo "  ${0##*/} lint            Lint all shell scripts"
   echo
   echo "Run without arguments for the interactive launcher."
 }
@@ -63,7 +67,7 @@ usage() {
 ENTRIES=()
 build_entries() {
   ENTRIES=()
-  local entry key dir script line action desc
+  local entry key dir script action desc
   for entry in "${LABS[@]}"; do
     key="${entry%%|*}"
     dir="$(lab_dir "${key}")"
@@ -137,6 +141,7 @@ menu_loop() {
 case "${1:-}" in
   "")             menu_loop ;;
   -h|--help|help) usage ;;
+  lint)           shift; exec "${ROOT_DIR}/scripts/lint.sh" "$@" ;;
   *)
     if script="$(lab_script "$1")"; then
       shift

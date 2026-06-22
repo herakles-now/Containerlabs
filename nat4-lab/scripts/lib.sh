@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # lab variables below are consumed by sourcing scripts
 
 LAB_NAME="nat4-lab"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -269,8 +270,11 @@ finish_test_capture() {
   CAPTURE_INSIDE_OUTPUT="$(cat "${CAPTURE_INSIDE_FILE}")"
   CAPTURE_OUTSIDE_OUTPUT="$(cat "${CAPTURE_OUTSIDE_FILE}")"
   echo "===== INSIDE BEFORE NAT ====="
+  # sed prefixes every captured line; ${var//} cannot anchor per line.
+  # shellcheck disable=SC2001
   sed 's/^/[INSIDE]  /' <<<"${CAPTURE_INSIDE_OUTPUT}"
   echo "===== OUTSIDE AFTER NAT ====="
+  # shellcheck disable=SC2001
   sed 's/^/[OUTSIDE] /' <<<"${CAPTURE_OUTSIDE_OUTPUT}"
   rm -f "${CAPTURE_INSIDE_FILE}" "${CAPTURE_OUTSIDE_FILE}"
 }

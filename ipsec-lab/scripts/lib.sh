@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # lab variables below are consumed by sourcing scripts
 
 # Shared helpers. This file is sourced by the executable scripts.
 LAB_NAME="ipsec-lab"
