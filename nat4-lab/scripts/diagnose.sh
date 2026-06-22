@@ -46,9 +46,14 @@ check_nat() {
 
 check_datapath() {
   local status=0
+  # static/dynamic/pat use protocol-agnostic SNAT, so ICMP exercises them.
   run_on static-host ping -c 2 -W 2 198.51.100.100 >/dev/null 2>&1 || { echo "         static-host cannot reach 198.51.100.100"; status=1; }
   run_on dynamic-host1 ping -c 2 -W 2 198.51.101.100 >/dev/null 2>&1 || { echo "         dynamic-host1 cannot reach 198.51.101.100"; status=1; }
   run_on pat-host1 ping -c 2 -W 2 198.51.103.100 >/dev/null 2>&1 || { echo "         pat-host1 cannot reach 198.51.103.100"; status=1; }
+  # Port forwarding is TCP-only (DNAT 198.51.102.1:8080 -> 10.10.3.10:80), so it
+  # needs an end-to-end TCP probe with a short-lived server on the inside.
+  start_http_server forward-server 80 "diagnose probe" >/dev/null 2>&1 || true
+  run_on forward-client curl -fsS --max-time 4 http://198.51.102.1:8080/ >/dev/null 2>&1 || { echo "         forward-client cannot reach the inside server via 198.51.102.1:8080"; status=1; }
   return "${status}"
 }
 

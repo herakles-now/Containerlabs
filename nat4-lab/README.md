@@ -122,7 +122,8 @@ Conntrack displays original and reply tuples. nftables makes the NAT decision fo
 Faults: `flush-nat` (static-gw's `ip nat4` table is deleted), `forwarding-off`
 (pat-gw stops forwarding), `rpfilter-on` (dynamic-gw enables strict reverse-path
 filtering and drops return traffic). Inject one, then run `diagnose` (it checks
-containers → gateway sysctls → NAT tables → data path and stops at the lowest
+containers → gateway sysctls → NAT tables → data path for all four scenarios,
+including a TCP probe through the port-forward DNAT, and stops at the lowest
 failing layer) or the matching `test-*`/`verify`, then `heal`.
 
 ## Limitations
