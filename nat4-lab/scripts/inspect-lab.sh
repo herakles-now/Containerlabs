@@ -7,26 +7,6 @@ source "${SCRIPT_DIR}/lib.sh"
 
 CASE="${CASE:-all}"
 
-print_topology_overview() {
-  echo "===== containerlab graph ====="
-  if command -v containerlab >/dev/null 2>&1; then
-    clab graph --topo "${TOPOLOGY_FILE}" --mermaid || true
-  else
-    echo "containerlab is not installed."
-  fi
-
-  echo
-  echo "===== containerlab inspect ====="
-  if command -v containerlab >/dev/null 2>&1; then
-    clab inspect --topo "${TOPOLOGY_FILE}" --wide || true
-    echo
-    echo "===== containerlab interfaces ====="
-    clab inspect interfaces --topo "${TOPOLOGY_FILE}" || true
-  else
-    echo "containerlab is not installed."
-  fi
-}
-
 print_case_overview() {
   local case_name="$1" gateway="$2" path_text="$3"
 
@@ -44,7 +24,7 @@ print_case_overview() {
 
 require_nodes static-gw dynamic-gw forward-gw pat-gw
 
-print_topology_overview
+clab_overview
 
 case "${CASE}" in
   static)
