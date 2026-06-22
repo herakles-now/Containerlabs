@@ -34,6 +34,8 @@ check_sysctls() {
   return "${status}"
 }
 
+check_mtu() { check_interface_mtu "${CONTAINERS[@]}"; }
+
 check_nat() {
   local gw status=0
   for gw in "${GATEWAYS[@]}"; do
@@ -63,6 +65,7 @@ check_datapath() {
 CHECKS=(
   "Containers running|A node is down — deploy or restart the lab.|check_containers"
   "Gateway sysctls|A gateway will not route or drops return traffic; check net.ipv4.ip_forward and conf.all.rp_filter.|check_sysctls"
+  "Interface MTU|A link MTU was lowered; large packets/TCP (MSS) may black-hole. Check 'ip link' on both ends.|check_mtu"
   "NAT tables|A gateway lost its 'ip nat4' table — re-run './lab.sh nat4 configure'.|check_nat"
   "Data path|Inside hosts cannot reach their outside server (static/dynamic/pat); inspect nft rules and conntrack with './lab.sh nat4 state'.|check_datapath"
 )

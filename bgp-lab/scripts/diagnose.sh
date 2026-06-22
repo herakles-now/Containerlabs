@@ -51,6 +51,8 @@ check_links() {
   return "${status}"
 }
 
+check_mtu() { check_interface_mtu "${ROUTERS[@]}"; }
+
 check_forwarding() {
   local r status=0
   for r in "${ROUTERS[@]}"; do
@@ -109,6 +111,7 @@ CHECKS=(
   "Containers running|Some routers are down — deploy or restart the lab.|check_containers"
   "Interfaces & addresses|A router lost its dummy0 address — re-run './lab.sh bgp configure'.|check_interfaces"
   "Point-to-point links|A /30 link is down or misaddressed; check the eth interfaces and both link endpoints.|check_links"
+  "Interface MTU|A link MTU was lowered; large packets/TCP (MSS) may black-hole. Check 'ip link' on both ends.|check_mtu"
   "IPv4 forwarding|A router will not forward transit traffic; check net.ipv4.ip_forward.|check_forwarding"
   "BGP sessions|A neighbor is down; in 'show bgp summary' look for Idle/Active and check remote-as plus 'no neighbor ... shutdown'.|check_sessions"
   "Prefix origination|R1 is missing prefixes; check that each origin router still has its 'network' statement.|check_prefixes"

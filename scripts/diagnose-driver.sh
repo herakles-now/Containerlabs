@@ -14,6 +14,30 @@ LAB_SHORT="${LAB_NAME%-lab}"
 dx_ok()   { printf '       [ ok ] %s\n' "$1"; }
 dx_fail() { printf '       [FAIL] %s\n' "$1"; }
 
+# Flag any eth1+ data-plane interface whose MTU is below the lab's baseline (the
+# largest eth MTU seen across the given nodes). Catches a lowered or mismatched
+# link MTU — which silently black-holes large packets / a too-high TCP MSS —
+# without hardcoding the deployment's default MTU. Pass the node names to check.
+check_interface_mtu() {
+  local n d m line baseline=0 status=0
+  local -a items=()
+  # This script runs in the container; $i and $() expand there, not here.
+  # shellcheck disable=SC2016
+  local probe='for i in /sys/class/net/eth[1-9]*; do [ -e "$i" ] || continue; echo "${i##*/}=$(cat "$i/mtu" 2>/dev/null)"; done'
+  for n in "$@"; do
+    while IFS='=' read -r d m; do
+      [[ -n "${d}" && -n "${m}" ]] || continue
+      items+=("${n}:${d}=${m}")
+      (( m > baseline )) && baseline="${m}"
+    done < <(run_on "${n}" sh -c "${probe}" 2>/dev/null)
+  done
+  for line in "${items[@]}"; do
+    m="${line##*=}"
+    (( m < baseline )) && { echo "         ${line%=*} mtu=${m} (below the lab baseline ${baseline})"; status=1; }
+  done
+  return "${status}"
+}
+
 run_diagnosis() {
   local total=${#CHECKS[@]} i=1 entry title hint fn first_fail=""
   echo

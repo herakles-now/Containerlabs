@@ -28,6 +28,8 @@ check_routes() {
   return "${status}"
 }
 
+check_mtu() { check_interface_mtu "${NODES[@]}"; }
+
 check_forwarding() {
   local n status=0
   for n in r1 r2 transit; do
@@ -63,6 +65,7 @@ check_datapath() {
 CHECKS=(
   "Containers running|A node is down — deploy or restart the lab.|check_containers"
   "Addresses & routes|R1 cannot reach the transit; check its default route via 100.64.1.2.|check_routes"
+  "Interface MTU|A link MTU was lowered; ESP overhead plus a too-high MSS will black-hole large packets. Check 'ip link'.|check_mtu"
   "IPv4 forwarding|A gateway/transit will not forward packets; check net.ipv4.ip_forward.|check_forwarding"
   "IKE & ESP|The tunnel is not up; check 'swanctl --list-sas' (IKE blocked or auth failing) and 'ip xfrm state'.|check_ipsec"
   "Data path|The SA is up but data fails — suspect ESP being dropped in transit; watch with './lab.sh ipsec transit-watch'.|check_datapath"

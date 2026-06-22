@@ -106,9 +106,9 @@ Faults: `peer-shutdown` (R1's session to R3 is administratively down),
 `as-mismatch` (R1 uses the wrong remote-as for R2), `withdraw-prefix` (R7 stops
 originating 10.7.0.0/16). Inject one, then run `diagnose` (or `verify`/`state`)
 to find it and `heal` to fix it. `diagnose` checks bottom-up — containers,
-addresses, every /30 point-to-point link, forwarding, BGP sessions, the prefix
-table on *every* router, and full-mesh data-path reachability — and stops at the
-lowest failing layer.
+addresses, every /30 point-to-point link, interface MTU, forwarding, BGP
+sessions, the prefix table on *every* router, and full-mesh data-path
+reachability — and stops at the lowest failing layer.
 
 Useful manual commands include:
 
