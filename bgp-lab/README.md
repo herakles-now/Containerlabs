@@ -46,23 +46,31 @@ Containerlab uses the `clab-mgmt` network and `172.30.0.0/24` for management. Ma
 
 ## Requirements and startup
 
-Install Linux, Docker, and Containerlab. The user running the lab must be able to access the Docker daemon. From this directory, run:
+Install Linux, Docker, and Containerlab. The user running the lab must be able to access the Docker daemon (membership in the `docker` group, or sudo access). From this directory, start the interactive menu:
 
 ```bash
-sudo make deploy
+./lab.sh
 ```
 
-The deployment script validates the required commands, deploys the topology, waits for FRR, applies the Linux and BGP configuration, and runs verification. It is safe to run the configuration again:
+or run a single action directly:
 
 ```bash
-make configure
-make verify
+./lab.sh deploy
+```
+
+The scripts run as your user and escalate to `sudo` only for the steps that genuinely need root (Containerlab manipulates host network namespaces and veth pairs). You may be prompted for your password once at the start.
+
+The deployment action validates the required commands, deploys the topology, waits for FRR, applies the Linux and BGP configuration, and runs verification. It is safe to run the configuration again:
+
+```bash
+./lab.sh configure
+./lab.sh verify
 ```
 
 Destroy all lab containers and links with:
 
 ```bash
-sudo make destroy
+./lab.sh destroy
 ```
 
 This project intentionally follows the requested `frrouting/frr:latest` image tag. That is convenient for learning but means a future image update can change FRR behavior or command output. For long-lived CI or course material, replace `latest` with a version or digest that has been tested in that environment.
@@ -72,8 +80,8 @@ This project intentionally follows the requested `frrouting/frr:latest` image ta
 Run the complete test suite or display all control-plane routes:
 
 ```bash
-make verify
-make routes
+./lab.sh verify
+./lab.sh routes
 ```
 
 The verification checks all containers and FRR instances, every BGP session, all seven prefixes on R1, both paths from R1 to R5, and bidirectional sourced pings between R1 and R7. Useful manual commands include:
@@ -103,13 +111,13 @@ Both paths have the same default Local Preference and the same AS-path length. W
 Apply the focused Local Preference policy and inspect the result:
 
 ```bash
-make prefer-r3
+./lab.sh prefer-r3
 ```
 
 The inbound route map assigns Local Preference 200 only to 10.3.0.0/16 received from R3. A second permit clause passes all other R3 routes unchanged. R1 then selects `400 300` for that prefix despite the otherwise tied paths. Restore the baseline with:
 
 ```bash
-make reset-policy
+./lab.sh reset-policy
 ```
 
 ## Why `dummy0` is used instead of `lo`
@@ -131,9 +139,9 @@ The data plane is the Linux kernel forwarding traffic according to installed rou
 1. Confirm Docker and the containers: `docker ps --filter name=clab-bgp-lab`.
 2. Confirm interface addresses: `docker exec clab-bgp-lab-r1 ip addr`.
 3. Confirm the local dummy route: `docker exec clab-bgp-lab-r1 ip route get 10.1.0.1`.
-4. Check peer states and received prefix counts: `make routes`.
+4. Check peer states and received prefix counts: `./lab.sh routes`.
 5. Check the kernel's BGP routes: `docker exec clab-bgp-lab-r1 vtysh -c 'show ip route bgp'`.
-6. Reapply the idempotent configuration with `make configure` if a container was restarted.
-7. Run `make verify`; on any failure it automatically prints BGP summaries, the BGP table, FRR BGP routes, Linux routes, and interface addresses for every available router.
+6. Reapply the idempotent configuration with `./lab.sh configure` if a container was restarted.
+7. Run `./lab.sh verify`; on any failure it automatically prints BGP summaries, the BGP table, FRR BGP routes, Linux routes, and interface addresses for every available router.
 
 If peers remain `Active`, verify both ends of the /30 link and their `remote-as` values. If a `network` prefix is absent, first verify that the exact /16 connected route exists through `dummy0`. If BGP learns a route but ping fails, inspect `show ip route bgp`, Linux `ip route`, IP forwarding, and the reverse path.

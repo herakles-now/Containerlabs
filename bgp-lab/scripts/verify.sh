@@ -44,14 +44,14 @@ require_command docker || exit 1
 
 for router in "${ROUTERS[@]}"; do
   name="$(container_name "${router}")"
-  if docker inspect "${name}" >/dev/null 2>&1; then
+  if docker_cmd inspect "${name}" >/dev/null 2>&1; then
     pass "Container ${name} exists"
   else
     fail "Container ${name} is missing"
     continue
   fi
 
-  if [[ "$(docker inspect -f '{{.State.Running}}' "${name}" 2>/dev/null)" == "true" ]]; then
+  if [[ "$(docker_cmd inspect -f '{{.State.Running}}' "${name}" 2>/dev/null)" == "true" ]]; then
     pass "Container ${name} is running"
   else
     fail "Container ${name} is not running"
@@ -126,7 +126,7 @@ if (( failures > 0 )); then
   echo
   echo "${failures} verification check(s) failed. Collecting diagnostics..." >&2
   for router in "${ROUTERS[@]}"; do
-    if docker inspect "$(container_name "${router}")" >/dev/null 2>&1; then
+    if docker_cmd inspect "$(container_name "${router}")" >/dev/null 2>&1; then
       debug_router "${router}"
     fi
   done

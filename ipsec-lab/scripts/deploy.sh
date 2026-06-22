@@ -7,18 +7,18 @@ source "${SCRIPT_DIR}/lib.sh"
 
 require_command docker
 require_command containerlab
-require_root
+ensure_sudo
 
-if ! docker info >/dev/null 2>&1; then
-  echo "ERROR: Docker is unavailable or access to the daemon is denied." >&2
+if ! docker_cmd info >/dev/null 2>&1; then
+  echo "ERROR: Docker is installed, but the daemon is unavailable or access is denied." >&2
   exit 1
 fi
 
 echo "Building ${IMAGE_NAME}..."
-docker build -t "${IMAGE_NAME}" "${PROJECT_DIR}"
+docker_cmd build -t "${IMAGE_NAME}" "${PROJECT_DIR}"
 
 echo "Deploying ${LAB_NAME}..."
-containerlab deploy --topo "${TOPOLOGY_FILE}"
+clab deploy --topo "${TOPOLOGY_FILE}"
 
 echo "Waiting for IPsec services to initialize..."
 sleep 5

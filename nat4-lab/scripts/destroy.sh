@@ -11,5 +11,8 @@ ensure_sudo
 if clab inspect --topo "${TOPOLOGY_FILE}" >/dev/null 2>&1; then
   clab destroy --topo "${TOPOLOGY_FILE}" --cleanup
 else
-  echo "Lab ${LAB_NAME} is not deployed. Nothing to destroy."
+  echo "Lab ${LAB_NAME} is not deployed. Skipping containerlab destroy."
 fi
+
+echo "Removing the host bridges..."
+"${SCRIPT_DIR}/cleanup-host-bridges.sh"
