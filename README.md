@@ -70,9 +70,15 @@ to `sudo` only where Containerlab or host networking actually require root.
 ./lab.sh nat4 deploy     # run a single action in a lab
 ```
 
-Two global actions are not tied to a single lab:
+Some global actions are not tied to a single lab. `up`, `down` and `clean`
+fan a lifecycle action out across every lab (a lab without its own `clean`
+falls back to `destroy`); they are also offered as `u`/`d`/`c` in the launcher
+menu:
 
 ```bash
+./lab.sh up              # deploy every lab
+./lab.sh down            # destroy every lab
+./lab.sh clean           # clean every lab (destroy + remove images)
 ./lab.sh doctor          # check docker, containerlab and sudo are available
 ./lab.sh lint            # lint every shell script (bash -n + shellcheck)
 ```

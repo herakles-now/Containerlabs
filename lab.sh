@@ -38,6 +38,41 @@ lab_script() {
   printf '%s/%s/lab.sh\n' "${ROOT_DIR}" "${dir}"
 }
 
+# True if a lab's lab.sh defines the given action.
+lab_has_action() {
+  local script="$1" action="$2"
+  "${script}" --list | cut -f1 | grep -qx "${action}"
+}
+
+# Run one action across every lab in turn. A lab that doesn't define the
+# action is skipped with a note; for "clean" we fall back to "destroy" so a
+# clean-all still tears down labs that have no image to remove. Returns 1 if
+# any lab exited non-zero.
+run_all() {
+  local action="$1" entry key script effective rc=0
+  for entry in "${LABS[@]}"; do
+    key="${entry%%|*}"
+    script="$(lab_script "${key}")"
+    effective="${action}"
+    if ! lab_has_action "${script}" "${effective}"; then
+      if [[ "${action}" == "clean" ]] && lab_has_action "${script}" "destroy"; then
+        effective="destroy"
+      else
+        echo
+        echo "  ── ${key}: no '${action}' action, skipping ──"
+        continue
+      fi
+    fi
+    echo
+    echo "  ── ${key}: ${effective} ──"
+    if ! "${script}" "${effective}"; then
+      rc=1
+      echo "  '${key} ${effective}' exited with a non-zero status." >&2
+    fi
+  done
+  return "${rc}"
+}
+
 usage() {
   local entry
   echo "Usage: ${0##*/} [lab] [action]"
@@ -50,6 +85,9 @@ usage() {
   done
   echo
   echo "Global actions:"
+  echo "  up      Deploy every lab"
+  echo "  down    Destroy every lab"
+  echo "  clean   Clean every lab (destroy + remove images)"
   echo "  doctor  Check the host has docker, containerlab and sudo"
   echo "  lint    Lint all shell scripts (bash -n + shellcheck)"
   echo
@@ -57,6 +95,7 @@ usage() {
   echo "  ${0##*/}                 Interactive launcher"
   echo "  ${0##*/} bgp             Open the bgp-lab menu"
   echo "  ${0##*/} nat4 deploy     Run a single action in nat4-lab"
+  echo "  ${0##*/} up              Deploy all labs"
   echo "  ${0##*/} doctor          Check the environment"
   echo
   echo "Run without arguments for the interactive launcher."
@@ -75,6 +114,10 @@ print_menu() {
     printf '  %2d) %-6s %s\n' "${i}" "${key}" "${desc}"
     ((i++))
   done
+  echo "  ──────────────────────────────────────────────────"
+  echo "   u) up      Deploy every lab"
+  echo "   d) down    Destroy every lab"
+  echo "   c) clean   Clean every lab (destroy + remove images)"
   echo "   q) quit"
   echo "  ──────────────────────────────────────────────────"
 }
@@ -86,6 +129,9 @@ menu_loop() {
     read -rp "  Select a lab: " choice || { echo; break; }
     case "${choice}" in
       q|Q|quit|exit) echo; break ;;
+      u|U|up)    echo; run_all deploy; echo; read -rp "  Press Enter to return... " _ || break; continue ;;
+      d|D|down)  echo; run_all destroy; echo; read -rp "  Press Enter to return... " _ || break; continue ;;
+      c|C|clean) echo; run_all clean; echo; read -rp "  Press Enter to return... " _ || break; continue ;;
       "") continue ;;
       *[!0-9]*) echo "  Invalid choice: ${choice}" >&2; continue ;;
       *)
@@ -107,6 +153,9 @@ case "${1:-}" in
   -h|--help|help) usage ;;
   lint)           shift; exec "${ROOT_DIR}/scripts/lint.sh" "$@" ;;
   doctor)         shift; exec "${ROOT_DIR}/scripts/doctor.sh" "$@" ;;
+  up)             run_all deploy ;;
+  down)           run_all destroy ;;
+  clean)          run_all clean ;;
   *)
     if script="$(lab_script "$1")"; then
       shift
