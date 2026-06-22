@@ -56,7 +56,7 @@ detect_privilege() {
 # front, instead of in the middle of a long-running deploy/destroy.
 ensure_sudo() {
   detect_privilege || return 1
-  if (( ${#SUDO[@]} > 0 )) || [[ "${DOCKER[0]}" == "sudo" ]]; then
+  if (( ${#SUDO[@]} > 0 )); then
     echo "Elevated privileges are required; you may be prompted for your sudo password." >&2
     sudo -v
   fi
