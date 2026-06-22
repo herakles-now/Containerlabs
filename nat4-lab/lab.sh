@@ -1,22 +1,33 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Entry point for the bgp-lab. Run without arguments for an interactive
+# Entry point for the nat4-lab. Run without arguments for an interactive
 # menu, or pass an action directly, e.g. `./lab.sh deploy`.
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR="${PROJECT_DIR}/scripts"
+LAB_TITLE="nat4-lab"
 
 # Ordered list of "action|script|description" entries. The menu and the
-# command dispatcher are both generated from this single source.
+# command dispatcher are both generated from this single source. The four
+# NAT cases each get explicit test/capture actions instead of a CASE flag.
 ACTIONS=(
-  "deploy|deploy.sh|Deploy the lab, configure it and verify"
-  "configure|configure.sh|(Re)apply the Linux and BGP configuration"
-  "verify|verify.sh|Run all verification checks"
-  "routes|show-routes.sh|Show BGP summaries and routes"
-  "prefer-r3|prefer-r3-to-r5.sh|Apply the Local-Preference policy on R1"
-  "reset-policy|reset-policy.sh|Remove the Local-Preference policy"
-  "destroy|destroy.sh|Tear the lab down"
+  "deploy|deploy.sh|Build, create bridges, deploy and configure"
+  "build|build.sh|Build the lab image only"
+  "configure|configure-all.sh|(Re)apply addresses, routes and nftables"
+  "verify|test-all.sh|Run all four NAT scenario tests"
+  "test-static|test-static-nat.sh|Test static NAT (L3 only)"
+  "test-dynamic|test-dynamic-nat.sh|Test dynamic pool NAT"
+  "test-forward|test-port-forward.sh|Test destination port forwarding"
+  "test-pat|test-pat.sh|Test PAT (many-to-one)"
+  "capture-static|capture-static-nat.sh|Live capture for static NAT"
+  "capture-dynamic|capture-dynamic-nat.sh|Live capture for dynamic NAT"
+  "capture-forward|capture-port-forward.sh|Live capture for port forwarding"
+  "capture-pat|capture-pat.sh|Live capture for PAT"
+  "state|show-state.sh|Show nftables and conntrack per gateway"
+  "inspect|inspect-lab.sh|Show the containerlab and per-case state"
+  "destroy|destroy.sh|Tear down the lab and host bridges"
+  "clean|clean.sh|Tear down and remove the lab image"
 )
 
 script_for() {
@@ -49,7 +60,7 @@ usage() {
   for entry in "${ACTIONS[@]}"; do
     local action="${entry%%|*}"
     local desc="${entry##*|}"
-    printf '  %-13s %s\n' "${action}" "${desc}"
+    printf '  %-16s %s\n' "${action}" "${desc}"
   done
   echo
   echo "Run without an action for an interactive menu."
@@ -67,12 +78,12 @@ list_actions() {
 print_menu() {
   local i=1 entry
   echo
-  echo "  bgp-lab — choose an action"
+  echo "  ${LAB_TITLE} — choose an action"
   echo "  ────────────────────────────────────────────────────"
   for entry in "${ACTIONS[@]}"; do
     local action="${entry%%|*}"
     local desc="${entry##*|}"
-    printf '   %d) %-13s %s\n' "${i}" "${action}" "${desc}"
+    printf '  %2d) %-16s %s\n' "${i}" "${action}" "${desc}"
     ((i++))
   done
   echo "   q) quit"
@@ -104,8 +115,8 @@ menu_loop() {
 }
 
 case "${1:-}" in
-  "")          menu_loop ;;
+  "")             menu_loop ;;
   -h|--help|help) usage ;;
-  --list)      list_actions ;;
-  *)           run_action "$1" ;;
+  --list)         list_actions ;;
+  *)              run_action "$1" ;;
 esac

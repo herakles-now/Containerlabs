@@ -14,20 +14,14 @@ CONTAINERS=(
 
 BRIDGES=(br-n4-si br-n4-so br-n4-di br-n4-do br-n4-fi br-n4-fo br-n4-pi br-n4-po)
 
+# Command prefixes for operations that may need elevated privileges. The
+# scripts run as the invoking user; detect_privilege() fills these in on
+# first use and escalates to sudo only when it is actually required.
+DOCKER=(docker)
+SUDO=()
+
 container_name() {
   printf 'clab-%s-%s' "${LAB_NAME}" "$1"
-}
-
-run_on() {
-  local node="$1"
-  shift
-  docker exec "$(container_name "${node}")" "$@"
-}
-
-run_on_stdin() {
-  local node="$1"
-  shift
-  docker exec -i "$(container_name "${node}")" "$@"
 }
 
 require_command() {
@@ -37,22 +31,84 @@ require_command() {
   fi
 }
 
-require_root() {
-  if (( EUID != 0 )); then
-    echo "ERROR: This operation requires root privileges. Run it with sudo." >&2
-    return 1
+# Decide, once, whether docker, containerlab and host network commands need
+# sudo. containerlab and host bridge/namespace operations always need root;
+# docker only needs sudo when the user is not in the 'docker' group. Running
+# as root needs no escalation at all.
+detect_privilege() {
+  [[ -n "${_PRIVILEGE_DETECTED:-}" ]] && return 0
+
+  if (( EUID == 0 )); then
+    DOCKER=(docker)
+    SUDO=()
+    _PRIVILEGE_DETECTED=1
+    return 0
   fi
+
+  require_command sudo || return 1
+
+  if docker info >/dev/null 2>&1; then
+    DOCKER=(docker)
+  else
+    DOCKER=(sudo docker)
+  fi
+  SUDO=(sudo)
+
+  _PRIVILEGE_DETECTED=1
+  return 0
+}
+
+# Prime the sudo credential cache so the password is requested once, up
+# front, instead of in the middle of a long-running deploy/destroy.
+ensure_sudo() {
+  detect_privilege || return 1
+  if (( ${#SUDO[@]} > 0 )) || [[ "${DOCKER[0]}" == "sudo" ]]; then
+    echo "Elevated privileges are required; you may be prompted for your sudo password." >&2
+    sudo -v
+  fi
+}
+
+# Run docker, escalating to sudo only when the daemon is not reachable as
+# the current user.
+docker_cmd() {
+  detect_privilege || return 1
+  "${DOCKER[@]}" "$@"
+}
+
+# Run containerlab, escalating to sudo when not already root.
+clab() {
+  detect_privilege || return 1
+  "${SUDO[@]}" containerlab "$@"
+}
+
+# Run a host command that needs root (e.g. host bridge management),
+# escalating to sudo when not already root.
+as_root() {
+  detect_privilege || return 1
+  "${SUDO[@]}" "$@"
+}
+
+run_on() {
+  local node="$1"
+  shift
+  docker_cmd exec "$(container_name "${node}")" "$@"
+}
+
+run_on_stdin() {
+  local node="$1"
+  shift
+  docker_cmd exec -i "$(container_name "${node}")" "$@"
 }
 
 require_container() {
   local node="$1"
   local name
   name="$(container_name "${node}")"
-  if ! docker inspect "${name}" >/dev/null 2>&1; then
+  if ! docker_cmd inspect "${name}" >/dev/null 2>&1; then
     echo "ERROR: Container ${name} does not exist. Deploy the lab first." >&2
     return 1
   fi
-  if [[ "$(docker inspect -f '{{.State.Running}}' "${name}")" != "true" ]]; then
+  if [[ "$(docker_cmd inspect -f '{{.State.Running}}' "${name}")" != "true" ]]; then
     echo "ERROR: Container ${name} is not running." >&2
     return 1
   fi

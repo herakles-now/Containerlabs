@@ -7,8 +7,7 @@ This lab makes NAT visible at packet level. Four fully isolated scenarios show w
 - Linux host
 - Docker
 - Containerlab
-- Root/sudo privileges for bridges, network namespaces, and Containerlab
-- `make`
+- `sudo` privileges for bridges, network namespaces, and Containerlab
 
 The common Alpine image contains Bash, iproute2, nftables, tcpdump, conntrack-tools, curl, iputils, BusyBox networking tools, and bind-tools.
 
@@ -16,14 +15,18 @@ The common Alpine image contains Bash, iproute2, nftables, tcpdump, conntrack-to
 
 ```bash
 cd nat4-lab
-sudo make deploy
-sudo make verify
+./lab.sh deploy
+./lab.sh verify
 ```
 
-`make deploy` builds the image, creates eight isolated host bridges, deploys all containers, and configures addresses, routes, forwarding, and nftables. The configuration is repeatable:
+Run `./lab.sh` without an action for an interactive menu. The scripts run as the
+invoking user and escalate to `sudo` only where bridges, namespaces, or
+Containerlab require root.
+
+`./lab.sh deploy` builds the image, creates eight isolated host bridges, deploys all containers, and configures addresses, routes, forwarding, and nftables. The configuration is repeatable:
 
 ```bash
-sudo make configure
+./lab.sh configure
 ```
 
 ## The Four Cases
@@ -56,35 +59,34 @@ Two internal hosts simultaneously start the same destination flow with source po
 ## Tests
 
 ```bash
-sudo make test CASE=static
-sudo make test CASE=dynamic
-sudo make test CASE=forward
-sudo make test CASE=pat
-sudo make test CASE=all
+./lab.sh test-static
+./lab.sh test-dynamic
+./lab.sh test-forward
+./lab.sh test-pat
 ```
 
 Each test clears its NAT state, starts the appropriate HTTP server, captures both gateway interfaces, generates traffic, validates the expected tuples, and displays nftables and conntrack state. `eth1` is always inside and `eth2` is always outside.
 
-`sudo make verify` is the standard lifecycle command and runs the same complete suite as `sudo make test CASE=all`.
+`./lab.sh verify` is the standard lifecycle command and runs all four scenario tests.
 
 ## Live Captures
 
 Terminal 1:
 
 ```bash
-sudo make capture CASE=static
+./lab.sh capture-static
 ```
 
 Terminal 2 during the 30-second capture window:
 
 ```bash
-sudo make test CASE=static
+./lab.sh test-static
 ```
 
-Other valid `CASE` values are `dynamic`, `forward`, and `pat`. Override the duration as follows:
+Other capture actions are `capture-dynamic`, `capture-forward`, and `capture-pat`. Override the duration with the `DURATION` environment variable:
 
 ```bash
-sudo DURATION=60 make capture CASE=pat
+DURATION=60 ./lab.sh capture-pat
 ```
 
 Lines marked `[INSIDE]` show packets before NAT on `eth1`; lines marked `[OUTSIDE]` show the corresponding flow after NAT on `eth2`.
@@ -92,13 +94,16 @@ Lines marked `[INSIDE]` show packets before NAT on `eth1`; lines marked `[OUTSID
 ## State and Diagnostics
 
 ```bash
-sudo make state
+./lab.sh state
+./lab.sh inspect
 docker exec clab-nat4-lab-pat-gw nft list table ip nat4
 docker exec clab-nat4-lab-pat-gw conntrack -L -o extended
 docker exec clab-nat4-lab-pat-gw ip -br address
 ```
 
 Conntrack displays original and reply tuples. nftables makes the NAT decision for the first packet of a flow; later packets follow the stored conntrack mapping. Rules and state must therefore be examined together.
+
+`./lab.sh inspect` adds the current Containerlab view on top of the per-scenario state: it prints the live graph, the deployed lab inventory, the node interfaces, and then the nftables, conntrack, IP address, and routing state for each NAT gateway.
 
 ## Limitations
 
@@ -111,9 +116,9 @@ Conntrack displays original and reply tuples. nftables makes the NAT decision fo
 ## Cleanup
 
 ```bash
-sudo make destroy
+./lab.sh destroy
 ```
 
-This removes the containers, veth links, generated Containerlab directory, and all eight host bridges. `sudo make clean` also removes the local `nat4-lab:latest` image.
+This removes the containers, veth links, generated Containerlab directory, and all eight host bridges. `./lab.sh clean` also removes the local `nat4-lab:latest` image.
 
 More detail is available in [docs/topology.md](docs/topology.md), [docs/static-nat.md](docs/static-nat.md), [docs/dynamic-nat.md](docs/dynamic-nat.md), [docs/port-forwarding.md](docs/port-forwarding.md), and [docs/pat.md](docs/pat.md).

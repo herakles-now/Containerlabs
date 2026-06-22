@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Entry point for the bgp-lab. Run without arguments for an interactive
+# Entry point for the ipsec-lab. Run without arguments for an interactive
 # menu, or pass an action directly, e.g. `./lab.sh deploy`.
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR="${PROJECT_DIR}/scripts"
+LAB_TITLE="ipsec-lab"
 
 # Ordered list of "action|script|description" entries. The menu and the
 # command dispatcher are both generated from this single source.
 ACTIONS=(
-  "deploy|deploy.sh|Deploy the lab, configure it and verify"
-  "configure|configure.sh|(Re)apply the Linux and BGP configuration"
-  "verify|verify.sh|Run all verification checks"
-  "routes|show-routes.sh|Show BGP summaries and routes"
-  "prefer-r3|prefer-r3-to-r5.sh|Apply the Local-Preference policy on R1"
-  "reset-policy|reset-policy.sh|Remove the Local-Preference policy"
+  "deploy|deploy.sh|Build the image, deploy the lab and verify"
+  "build|build.sh|Build the lab image only"
+  "verify|verify.sh|Trigger the tunnel and run all checks"
+  "transit-watch|transit-watch.sh|Follow the transit capture (IKE/ESP)"
   "destroy|destroy.sh|Tear the lab down"
+  "clean|clean.sh|Tear down and remove the lab image"
 )
 
 script_for() {
@@ -49,7 +49,7 @@ usage() {
   for entry in "${ACTIONS[@]}"; do
     local action="${entry%%|*}"
     local desc="${entry##*|}"
-    printf '  %-13s %s\n' "${action}" "${desc}"
+    printf '  %-15s %s\n' "${action}" "${desc}"
   done
   echo
   echo "Run without an action for an interactive menu."
@@ -67,12 +67,12 @@ list_actions() {
 print_menu() {
   local i=1 entry
   echo
-  echo "  bgp-lab — choose an action"
+  echo "  ${LAB_TITLE} — choose an action"
   echo "  ────────────────────────────────────────────────────"
   for entry in "${ACTIONS[@]}"; do
     local action="${entry%%|*}"
     local desc="${entry##*|}"
-    printf '   %d) %-13s %s\n' "${i}" "${action}" "${desc}"
+    printf '   %d) %-15s %s\n' "${i}" "${action}" "${desc}"
     ((i++))
   done
   echo "   q) quit"
@@ -104,8 +104,8 @@ menu_loop() {
 }
 
 case "${1:-}" in
-  "")          menu_loop ;;
+  "")             menu_loop ;;
   -h|--help|help) usage ;;
-  --list)      list_actions ;;
-  *)           run_action "$1" ;;
+  --list)         list_actions ;;
+  *)              run_action "$1" ;;
 esac

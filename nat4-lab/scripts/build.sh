@@ -6,7 +6,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
 
 require_command docker
-require_command containerlab
 ensure_sudo
 
 if ! docker_cmd info >/dev/null 2>&1; then
@@ -16,10 +15,3 @@ fi
 
 echo "Building ${IMAGE_NAME}..."
 docker_cmd build -t "${IMAGE_NAME}" "${PROJECT_DIR}"
-
-echo "Deploying ${LAB_NAME}..."
-clab deploy --topo "${TOPOLOGY_FILE}"
-
-echo "Waiting for IPsec services to initialize..."
-sleep 5
-"${SCRIPT_DIR}/verify.sh"

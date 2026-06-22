@@ -6,14 +6,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
 
 require_command ip
-require_root
+ensure_sudo
 
 for bridge in "${BRIDGES[@]}"; do
   if ip link show "${bridge}" >/dev/null 2>&1; then
     echo "Bridge ${bridge} already exists."
   else
-    ip link add name "${bridge}" type bridge
+    as_root ip link add name "${bridge}" type bridge
     echo "Created bridge ${bridge}."
   fi
-  ip link set "${bridge}" up
+  as_root ip link set "${bridge}" up
 done

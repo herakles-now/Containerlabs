@@ -59,17 +59,29 @@ topology, how to deploy it, and the failure scenarios to experiment with.
 
 ## Usage
 
+Each lab ships an interactive `lab.sh` menu. The top-level `lab.sh` in this
+directory is a launcher: run it without arguments to open any lab's menu or to
+run a single action directly. The scripts run as the invoking user and escalate
+to `sudo` only where Containerlab or host networking actually require root.
+
+```bash
+./lab.sh                 # interactive launcher (pick a lab or an action)
+./lab.sh bgp             # open the bgp-lab menu
+./lab.sh nat4 deploy     # run a single action in a lab
+```
+
 A typical lab is deployed, verified, and torn down like this:
 
 ```bash
 cd <lab-directory>
-sudo make deploy
-sudo make verify
+./lab.sh deploy
+./lab.sh verify
 # ... experiment, break things, inspect logs ...
-sudo make destroy
+./lab.sh destroy
 ```
 
-See the README inside each lab for the specific commands and scenarios.
+Running a lab's `./lab.sh` without an action opens its own menu. See the README
+inside each lab for the specific actions and scenarios.
 
 ## License
 

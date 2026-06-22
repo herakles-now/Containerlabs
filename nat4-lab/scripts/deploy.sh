@@ -7,6 +7,7 @@ source "${SCRIPT_DIR}/lib.sh"
 
 require_command docker
 require_command containerlab
+require_command ip
 ensure_sudo
 
 if ! docker_cmd info >/dev/null 2>&1; then
@@ -14,12 +15,13 @@ if ! docker_cmd info >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Building ${IMAGE_NAME}..."
-docker_cmd build -t "${IMAGE_NAME}" "${PROJECT_DIR}"
+"${SCRIPT_DIR}/build.sh"
+
+echo "Creating the eight isolated host bridges..."
+"${SCRIPT_DIR}/setup-host-bridges.sh"
 
 echo "Deploying ${LAB_NAME}..."
 clab deploy --topo "${TOPOLOGY_FILE}"
 
-echo "Waiting for IPsec services to initialize..."
-sleep 5
-"${SCRIPT_DIR}/verify.sh"
+echo "Configuring addresses, routes, forwarding and nftables..."
+"${SCRIPT_DIR}/configure-all.sh"

@@ -87,7 +87,7 @@ done
 if (( failures > 0 )); then
   echo "${failures} verification check(s) failed. Collecting diagnostics..." >&2
   for node in "${NODES[@]}"; do
-    if docker inspect "$(container_name "${node}")" >/dev/null 2>&1; then
+    if docker_cmd inspect "$(container_name "${node}")" >/dev/null 2>&1; then
       debug_node "${node}"
     fi
   done
