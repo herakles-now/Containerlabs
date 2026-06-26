@@ -1,0 +1,69 @@
+name: pg-cluster-lab
+
+mgmt:
+  network: pg-cluster-mgmt
+  ipv4-subnet: 172.31.251.0/24
+
+topology:
+  nodes:
+    # L2 switch: bridges the database nodes and the backup host onto one cluster
+    # subnet (10.10.0.0/24) so the topology is self-contained and a "network
+    # partition" fault is just a bridge port going down.
+    sw:
+      kind: linux
+      image: pg-cluster-lab:latest
+      binds:
+        - ./configs/sw.sh:/root/start.sh:ro
+      exec:
+        - bash /root/start.sh
+
+    # Primary: accepts writes, streams WAL to the standbys and archives WAL to
+    # the pgBackRest repository on the backup host.
+    pg1:
+      kind: linux
+      image: pg-cluster-lab:latest
+      binds:
+        - ./configs/pg1.sh:/root/start.sh:ro
+        - ./pgbackrest/pg1.conf:/etc/pgbackrest/pgbackrest.conf:ro
+      exec:
+        - bash /root/start.sh
+
+    # Standby A: read-only hot standby (no apply delay). pgBackRest reads the
+    # backup's data files from here (backup-standby).
+    pg2:
+      kind: linux
+      image: pg-cluster-lab:latest
+      binds:
+        - ./configs/pg2.sh:/root/start.sh:ro
+        - ./pgbackrest/pg2.conf:/etc/pgbackrest/pgbackrest.conf:ro
+      exec:
+        - bash /root/start.sh
+
+    # Standby B: time-delayed hot standby (recovery_min_apply_delay = 3min).
+    # Deliberately not part of the pgBackRest stanza (its delay would stall a
+    # standby backup).
+    pg3:
+      kind: linux
+      image: pg-cluster-lab:latest
+      binds:
+        - ./configs/pg3.sh:/root/start.sh:ro
+      exec:
+        - bash /root/start.sh
+
+    # Dedicated pgBackRest repository host: owns the repo and runs the repo-side
+    # commands (stanza-create, backup from the standby, restore, info). It runs
+    # no PostgreSQL of its own, so the backups survive the loss of pg1.
+    backup:
+      kind: linux
+      image: pg-cluster-lab:latest
+      binds:
+        - ./configs/backup.sh:/root/start.sh:ro
+        - ./pgbackrest/backup.conf:/etc/pgbackrest/pgbackrest.conf:ro
+      exec:
+        - bash /root/start.sh
+
+  links:
+    - endpoints: ["pg1:eth1", "sw:eth1"]
+    - endpoints: ["pg2:eth1", "sw:eth2"]
+    - endpoints: ["pg3:eth1", "sw:eth3"]
+    - endpoints: ["backup:eth1", "sw:eth4"]
