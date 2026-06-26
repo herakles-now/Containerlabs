@@ -38,7 +38,10 @@ run_action() {
     usage >&2
     return 2
   fi
-  "${SCRIPT_DIR}/${script}"
+  shift
+  # Forward any extra arguments to the action script (e.g. `backup full`);
+  # scripts that take no arguments simply ignore them.
+  "${SCRIPT_DIR}/${script}" "$@"
 }
 
 usage() {
@@ -110,6 +113,6 @@ lab_dispatch() {
     "")             menu_loop ;;
     -h|--help|help) usage ;;
     --list)         list_actions ;;
-    *)              run_action "$1" ;;
+    *)              run_action "$@" ;;
   esac
 }

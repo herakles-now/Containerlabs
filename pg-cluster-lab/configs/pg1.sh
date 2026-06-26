@@ -55,8 +55,8 @@ fi
 # 4. Start PostgreSQL
 su postgres -c "pg_ctl -D ${PGDATA} -l ${PGDATA}/server.log -w -t 30 start"
 
-# 5. Create the replication role used by the standbys (idempotent). The
-#    standbys create their own replication slots via pg_basebackup -C.
+# 5. Create the replication role used by the standbys (idempotent). Each standby
+#    creates its own physical replication slot before taking its base backup.
 su postgres -c "psql -U postgres -h ${SOCKDIR} -v ON_ERROR_STOP=1" <<'SQL'
 DO $$
 BEGIN
