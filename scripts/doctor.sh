@@ -14,6 +14,7 @@ LAB_CHECKS=(
   "bgp-lab|bgp-lab.clab.yml|"
   "ipsec-lab|ipsec-lab.clab.yml|ipsec-lab:latest"
   "nat4-lab|nat4-lab.clab.yml|nat4-lab:latest"
+  "pg-cluster-lab|pg-cluster-lab.clab.yml|pg-cluster-lab:latest"
 )
 
 errors=0

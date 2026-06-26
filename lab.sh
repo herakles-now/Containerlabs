@@ -18,6 +18,7 @@ LABS=(
   "bgp|bgp-lab|Seven-AS FRRouting eBGP lab"
   "ipsec|ipsec-lab|strongSwan IPsec site-to-site VPN"
   "nat4|nat4-lab|Four nftables NAT scenarios"
+  "pg-cluster|pg-cluster-lab|3-node PostgreSQL 18 cluster (pgBackRest, delayed standby)"
 )
 
 lab_dir() {

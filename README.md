@@ -53,6 +53,7 @@ troubleshoot real systems.
 | [`ipsec-lab`](./ipsec-lab) | strongSwan-based IPsec site-to-site VPN lab. |
 | [`bgp-lab`](./bgp-lab) | Seven-AS FRRouting eBGP lab covering route propagation, best-path selection, multihoming, and Local Preference. |
 | [`nat4-lab`](./nat4-lab) | Four isolated nftables NAT scenarios with packet captures and conntrack inspection. |
+| [`pg-cluster-lab`](./pg-cluster-lab) | PostgreSQL 18 streaming-replication cluster (primary, a hot standby and a 3-minute time-delayed standby) with a dedicated pgBackRest repository host that backs up *from the standby* (`backup-standby`) and a provable pg1 restore, plus replication, failover, replay and archiving faults. |
 
 Each lab lives in its own directory with a dedicated `README.md` describing the
 topology, how to deploy it, and the failure scenarios to experiment with.
